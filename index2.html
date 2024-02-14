@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Наочна демонстрація графіка</title>
+
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+
+    <style>
+        .divSmallFont{
+            font-size: 10pt;
+        }
+
+        input {margin: 3px 3px 3px 3px;}
+        #chartView { width: 100%; }
+
+        @media only screen and (max-width:600px){
+            #valueA, #valueB { width:80%;}
+        }
+    </style>
+
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+
+<body onload="calculate()">
+<script>
+    function findIntersection(x = 0, y = 0, g = 0){
+	let intersectionPoint = {};
+
+	if(Math.abs(y - g) < 0.01){
+		intersectionPoint = {x: null, y: null};
+		intersectionPoint.x = x.toPrecision(3);
+		intersectionPoint.y = y.toPrecision(3);
+		
+		return intersectionPoint;
+	}
+    }
+    function outIntersectionPoints(intersectionPoint = {}){
+	let text = document.getElementById("intersectionPointView").innerHTML;
+
+	if(intersectionPoint.x){
+		document.getElementById("intersectionPointView").innerHTML = text + "x:" + intersectionPoint.x + "y:" + intersectionPoint.y + " ";
+	}
+    }
+    function calculate(){
+	const intersectionPoints = [];
+
+        let a = parseFloat(document.getElementById("valueA").value);
+        let b = parseFloat(document.getElementById("valueB").value);
+        let min = parseFloat(document.getElementById("minX").value);
+        let max = parseFloat(document.getElementById("maxX").value);
+        let y;
+
+        let c = 15;
+        let d = 3;
+        let g;
+
+        // Generate values
+        const xValues = [];
+        const yValues = [];
+        const gValues = [];
+
+        for (let x = parseFloat(min); x <= max; x += 0.001) {
+            xValues.push(x);
+
+	    y = eval(a*Math.pow(x, 2)+b);
+            yValues.push(y);
+
+            g = eval(c*x+d);
+            gValues.push(g);
+
+            intersectionPoints.push(findIntersection(x, y, g));
+        }
+
+	document.getElementById("intersectionPointView").innerHTML = "";
+
+	intersectionPoints.map(outIntersectionPoints);
+
+        Plotly.purge("chartView"); 
+
+        // Display using Plotly
+        const data = [{x:xValues, y:yValues, mode:"lines", name: 'y=ax^2+b'}, {x:xValues, y:gValues, mode:"lines", name: 'g=cx+d'}];
+        //const data2 = [{x:xValues, y:gValues, mode:"lines", name: 'g=cx+d'}];
+
+        const combinedData = data;
+
+        const layout = {title: "Демонстрація графіка"};
+        Plotly.newPlot("chartView", combinedData, layout);
+    }
+</script>
+
+<div class="w3-row">
+    <div class="w3-col s12 m3 l3 w3-padding-16">
+        <form class="w3-container">
+            <div class="w3-bar w3-padding-16">
+                <label class="w3-bar-item" for="valueA">a =</label>
+                <input class="w3-input w3-bar-item w3-border" type="number" value="3" id="valueA" oninput="calculate()">
+            </div>
+            
+            <div class="w3-bar">
+                <label class="w3-bar-item" for="valueB">b =</label>
+                <input class="w3-input w3-bar-item w3-border" type="number" value="5" id="valueB" oninput="calculate()">
+            </div>
+            <div class="w3-row-padding w3-padding-16">
+                <div class="w3-half">
+                    <label for="minX">X від</label>
+                    <input class="w3-input w3-bar-item w3-border" type="number" value="0" id="minX" oninput="calculate()">
+                </div>
+
+                <div class="w3-half">
+                    <label for="minX">до</label>
+                    <input class="w3-input w3-bar-item w3-border" type="number" value="10" id="maxX" oninput="calculate()">
+                </div>
+            </div>
+        </form>
+	<div class="w3-container w3-margin" id="intersectionPointText">Точки перетину:</div>
+        <div class="w3-container w3-margin" id="intersectionPointView"></div>
+    </div>
+    <div class="w3-col s12 m8 l9">
+        <div id="chartView"></div>
+    </div>
+</div>
+</body>
+</html>
+
